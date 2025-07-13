@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0 text-Black">Welcome, {{ current_user.username }}</h2>
+            <p class="text-muted">Here’s a quick overview of your Time Capsules</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <section class="row">
+        <!-- Capsules Created -->
+        <div class="col-md-4 mb-4">
+            <div class="glass-card text-center p-4 h-100" aria-label="Total capsules created">
+                <div class="icon-circle bg-transparent mb-3">
+                    <i class="fas fa-box fa-2x text-black" aria-hidden="true"></i>
+                </div>
+                <h6 class="text-black-50 mb-1">Capsules Created</h6>
+                <p class="display-6 text-black fw-semibold">{{ capsule_count or 0 }}</p>
+            </div>
+        </div>
+
+        <!-- Pending Capsules -->
+        <div class="col-md-4 mb-4">
+            <div class="glass-card text-center p-4 h-100" aria-label="Capsules pending unlock">
+                <div class="icon-circle bg-transparent mb-3">
+                    <i class="fas fa-hourglass-half fa-2x text-black" aria-hidden="true"></i>
+                </div>
+                <h6 class="text-black-50 mb-1">Pending Capsules</h6>
+                <p class="display-6 text-black fw-semibold">{{ pending_count or 0 }}</p>
+            </div>
+        </div>
+
+        <!-- Unlocked Today -->
+        <div class="col-md-4 mb-4">
+            <div class="glass-card text-center p-4 h-100" aria-label="Capsules unlocked today">
+                <div class="icon-circle bg-transparent mb-3">
+                    <i class="fas fa-unlock-alt fa-2x text-black" aria-hidden="true"></i>
+                </div>
+                <h6 class="text-black-50 mb-1">Unlocked Today</h6>
+                <p class="display-6 text-black fw-semibold">{{ unlocked_today or 0 }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Buttons -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('capsule.create') }}"
+           class="btn btn-glass btn-primary rounded-pill me-2 px-4 py-2"
+           aria-label="Create new time capsule">
+            <i class="fas fa-plus me-1" aria-hidden="true"></i> Create New Capsule
+        </a>
+        <a href="{{ url_for('capsule.view_capsules') }}"
+           class="btn btn-glass btn-outline-light rounded-pill px-4 py-2"
+           aria-label="View existing capsules">
+            <i class="fas fa-box-open me-1" aria-hidden="true"></i> View My Capsules
+        </a>
+    </div>
+</div>
+{% endblock %}

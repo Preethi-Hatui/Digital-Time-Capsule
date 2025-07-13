@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Unlock {{ capsule.capsule_name }}{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="glass-card p-4 shadow-lg rounded-4 border border-light-subtle">
+
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <i class="fas fa-lock fa-3x mb-3 text-warning" aria-hidden="true"></i>
+                    <h3 class="mb-2 text-white">Unlock Time Capsule</h3>
+                    <p class="text-muted">
+                        Verify OTP to unlock <strong>{{ capsule.capsule_name }}</strong>
+                    </p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+                                <i class="fas fa-info-circle me-1"></i> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% if locked %}
+                    <!-- Locked View -->
+                    <div class="alert alert-danger text-center" role="alert">
+                        <i class="fas fa-ban me-2" aria-hidden="true"></i>
+                        Too many incorrect OTP attempts.<br>
+                        Please try again after <strong>1 hour</strong>.
+                    </div>
+                {% else %}
+                    <!-- OTP Form -->
+                    <form method="POST"
+                          action="{{ url_for('capsule.view', capsule_id=capsule.id) }}"
+                          class="needs-validation" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-4">
+                            <label for="otp" class="form-label text-white">Authenticator Code</label>
+                            <input type="text"
+                                   class="form-control text-center stylish-input"
+                                   id="otp"
+                                   name="otp"
+                                   placeholder="Enter 6-digit code"
+                                   required
+                                   inputmode="numeric"
+                                   pattern="[0-9]{6}"
+                                   maxlength="6"
+                                   autocomplete="off"
+                                   aria-label="One-Time Password"
+                                   autofocus>
+                            <div class="invalid-feedback">Please enter a valid 6-digit OTP.</div>
+                        </div>
+
+                        <!-- Countdown Timer -->
+                        <div class="alert alert-info text-center py-2 small" role="alert">
+                            <i class="fas fa-stopwatch me-1" aria-hidden="true"></i>
+                            OTP is valid for <strong>5 minutes</strong>. Timer:
+                            <span id="countdown" class="fw-bold">05:00</span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-glass py-2 rounded-pill">
+                                <i class="fas fa-check-circle me-2"></i> Verify OTP
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Optional Resend OTP (hidden unless time expires) -->
+                    {#
+                    <form method="POST"
+                          action="{{ url_for('auth.resend_capsule_otp') }}"
+                          class="text-center mt-3 d-none"
+                          id="resend-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill">
+                            <i class="fas fa-paper-plane me-1"></i> Resend OTP
+                        </button>
+                    </form>
+                    #}
+                {% endif %}
+
+                <!-- Back Button -->
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('capsule.view', capsule_id=capsule.id) }}"
+                       class="btn btn-outline-light rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Capsule
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let countdown = 300; // 5 minutes
+    const countdownDisplay = document.getElementById('countdown');
+    const resendForm = document.getElementById('resend-form');
+
+    const timer = setInterval(() => {
+        if (countdown <= 0) {
+            clearInterval(timer);
+            if (countdownDisplay) {
+                countdownDisplay.textContent = "Expired";
+                countdownDisplay.classList.remove("text-primary");
+                countdownDisplay.classList.add("text-danger");
+            }
+            if (resendForm) {
+                resendForm.classList.remove('d-none');
+            }
+        } else {
+            const minutes = String(Math.floor(countdown / 60)).padStart(2, '0');
+            const seconds = String(countdown % 60).padStart(2, '0');
+            countdownDisplay.textContent = `${minutes}:${seconds}`;
+            countdown--;
+        }
+    }, 1000);
+
+    // Prevent paste into OTP input
+    const otpInput = document.getElementById("otp");
+    if (otpInput) {
+        otpInput.focus();
+        otpInput.addEventListener("paste", e => e.preventDefault());
+    }
+
+    // Bootstrap form validation
+    (() => {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+});
+</script>
+{% endblock %}

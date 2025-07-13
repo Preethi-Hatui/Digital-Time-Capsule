@@ -1,0 +1,93 @@
+<nav class="navbar navbar-expand-lg shadow-sm navbar-glass sticky-top py-2"
+     style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.3);">
+    <div class="container">
+
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{{ url_for('main.home') }}">
+            <i class="fas fa-cube me-2 fs-5" style="color: #0a447f;"></i>
+            <span class="fs-5">Digital Time Capsule</span>
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span>
+                <i class="fas fa-bars text-dark fs-4"></i>
+            </span>
+        </button>
+
+        <!-- Navigation Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+                <!-- Home -->
+                <li class="nav-item">
+                    <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('main.home') }}">
+                        <i class="fas fa-home me-1" style="color: #001f3f;"></i>Home
+                    </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('main.dashboard') }}">
+                            <i class="fas fa-gauge me-1" style="color: #001f3f;"></i>Dashboard
+                        </a>
+                    </li>
+
+                    <!-- My Capsules -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('capsule.view_capsules') }}">
+                            <i class="fas fa-box-open me-1" style="color: #001f3f;"></i>My Capsules
+                        </a>
+                    </li>
+
+                    <!-- Create Capsule -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('capsule.create') }}">
+                            <i class="fas fa-plus-circle me-1" style="color: #001f3f;"></i>Create Capsule
+                        </a>
+                    </li>
+
+                    <!-- Admin Panel -->
+                    {% if current_user.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('admin.dashboard') }}">
+                                <i class="fas fa-user-shield me-1" style="color: #001f3f;"></i>Admin
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-danger hover-nav" href="{{ url_for('auth.logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+
+                {% else %}
+
+                    <!-- Login -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark fw-semibold hover-nav" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt me-1" style="color: #001f3f;"></i>Login
+                        </a>
+                    </li>
+
+                    <!-- Register -->
+                    <li class="nav-item">
+                        <a class="btn btn-outline-primary fw-bold px-3 py-1 rounded-pill"
+                           href="{{ url_for('auth.register') }}"
+                           style="border-color: #001f3f; color: #001f3f;">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+

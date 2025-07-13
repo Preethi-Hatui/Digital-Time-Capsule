@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container fade-in mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 text-center">
+            <div class="glass-card hero-box p-5 shadow-lg rounded-4 hover-glass">
+                <h1 class="display-4 fw-bold text-dark mb-3">
+                    <i class="fas fa-cube" style="color: #06427f;"></i> Digital Time Capsule
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Securely preserve your digital memories, evidence, and documents. Unlock them at the right time with advanced encryption and OTP authentication.
+                </p>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('capsule.create') }}" class="btn btn-dark btn-lg rounded-pill px-5 py-2 mt-2">
+                        <i class="fas fa-plus-circle me-2"></i>Create New Time Capsule
+                    </a>
+                {% else %}
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mt-4">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-dark btn-lg rounded-pill px-4 py-2">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-dark btn-lg rounded-pill px-4 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="container my-5">
+    <div class="row text-center g-4">
+        <div class="col-md-4">
+            <div class="feature-card glass-card p-4 text-white h-100">
+                <i class="fas fa-shield-alt fa-2x mb-3" style="color: #0a447f;"></i>
+                <h4 class="fw-bold text-dark">AES-256 Encryption</h4>
+                <img src="{{ url_for('static', filename='images/aes.png') }}" alt="AES Encryption" class="img-fluid my-3" style="height: 200px;">
+                <p class="text-dark">Military-grade protection ensures your files remain secure and inaccessible without authorization.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card glass-card p-4 text-white h-100">
+                <i class="fas fa-fingerprint fa-2x mb-3" style="color: #0a447f;"></i>
+                <h4 class="fw-bold text-dark">Forensic Integrity</h4>
+                <img src="{{ url_for('static', filename='images/forensic.png') }}" alt="Forensic Integrity" class="img-fluid my-3" style="height: 200px;">
+                <p class="text-dark">Timestamped, tamper-proof capsules designed for digital forensics and legal evidence.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card glass-card p-4 text-white h-100">
+                <i class="fas fa-clock fa-2x mb-3" style="color: #0a447f;"></i>
+                <h4 class="fw-bold text-dark">Time-Locked Access</h4>
+                <img src="{{ url_for('static', filename='images/lock.png') }}" alt="Time Lock" class="img-fluid my-3" style="height: 200px;">
+                <p class="text-dark">Files remain locked until the designated time, with no early access, even by administrators.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-dark">Why Choose Digital Time Capsule?</h2>
+        <p class="text-muted">Safeguard your critical digital assets with unmatched security and reliability.</p>
+    </div>
+    <div class="row text-center g-4">
+        <div class="col-md-3">
+            <div class="feature-card glass-card p-4 h-100">
+                <i class="fas fa-lock" style="color: #001f3f; font-size: 2rem;"></i>
+                <h5 class="fw-bold text-dark mt-2">Data Integrity</h5>
+                <img src="{{ url_for('static', filename='images/data.png') }}" alt="Data Integrity" class="img-fluid mb-2" style="height: 200px;">
+                <p class="text-muted">Your files are locked upon upload, ensuring they remain untouched and undeleted.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card glass-card p-4 h-100">
+                <i class="fas fa-key" style="color: #001f3f; font-size: 2rem;"></i>
+                <h5 class="fw-bold text-dark mt-2">OTP Verification</h5>
+                <img src="{{ url_for('static', filename='images/otp.png') }}" alt="OTP Verification" class="img-fluid mb-2" style="height: 200px;">
+                <p class="text-muted">Google Authenticator ensures only authorized users can access capsules.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card glass-card p-4 h-100">
+                <i class="fas fa-cloud" style="color: #001f3f; font-size: 2rem;"></i>
+                <h5 class="fw-bold text-dark mt-2">Cloud Storage</h5>
+                <img src="{{ url_for('static', filename='images/cloud.png') }}" alt="Cloud Storage" class="img-fluid mb-2" style="height: 200px;">
+                <p class="text-muted">Securely stored in AWS S3 with multi-region redundancy for reliability.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card glass-card p-4 h-100">
+                <i class="fas fa-infinity" style="color: #001f3f; font-size: 2rem;"></i>
+                <h5 class="fw-bold text-dark mt-2">Digital Legacy</h5>
+                <img src="{{ url_for('static', filename='images/legacy.png') }}" alt="Digital Legacy" class="img-fluid mb-2" style="height: 200px;">
+                <p class="text-muted">Preserve forensic records or personal assets for future generations.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-dark">How It Works</h2>
+        <p class="text-muted">Get started with 3 simple steps.</p>
+    </div>
+    <div class="row text-center g-4">
+        <!-- Step 1: Register & Verify -->
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <i class="fas fa-user-check fa-2x mb-3" style="color: #0a447f;"></i>
+                <h5 class="fw-bold text-dark">1. Register & Verify</h5>
+                <p class="text-muted">Sign up with your email and verify using the OTP sent to your inbox.</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Upload & Encrypt -->
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <i class="fas fa-upload fa-2x mb-3" style="color: #0a447f;"></i>
+                <h5 class="fw-bold text-dark">2. Upload & Lock Capsule</h5>
+                <p class="text-muted">Upload any file, set an unlock date, and scan the OTP QR with Google Authenticator.</p>
+            </div>
+        </div>
+
+        <!-- Step 3: Unlock with OTP -->
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <i class="fas fa-unlock-alt fa-2x mb-3" style="color: #0a447f;"></i>
+                <h5 class="fw-bold text-dark">3. Unlock Capsule</h5>
+                <p class="text-muted">Once your unlock date arrives, access the capsule using a valid OTP from your authenticator app.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Preserve What Matters Section -->
+<div class="container my-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/timeline.jpg') }}" class="img-fluid rounded-4 shadow hover-glass fixed-image" alt="Time capsule timeline">
+        </div>
+        <div class="col-md-6 mt-4 mt-md-0 text-center">
+            <h3 class="fw-bold text-dark mb-4">Preserve What Matters</h3>
+            <p class="text-muted mb-4">
+                Store important files in various formats, including PDF and DOCX. Your data is AES-256 encrypted and access-controlled via OTP.
+            </p>
+            <div class="row g-3 justify-content-center">
+                <div class="col-4">
+                    <i class="fas fa-file-alt" style="color: #0a447f; font-size: 1.8rem;"></i>
+                    <p class="text-muted small">Multiple file formats supported</p>
+                </div>
+                <div class="col-4">
+                    <i class="fas fa-shield-alt" style="color: #0a447f; font-size: 1.8rem;"></i>
+                    <p class="text-muted small">Encrypted, secure storage</p>
+                </div>
+                <div class="col-4">
+                    <i class="fas fa-key" style="color: #0a447f; font-size: 1.8rem;"></i>
+                    <p class="text-muted small">OTP-based secure access</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Final Call-To-Action -->
+<section class="container my-5 text-center">
+    <div class="glass-card p-5 rounded-4 shadow hover-glass">
+        <h3 class="fw-bold text-dark mb-3">Ready to Secure Your First Capsule?</h3>
+        <p class="text-muted mb-4">
+            Protect your evidence, memories, or personal documents with advanced cryptographic security and time-locked access.
+        </p>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg rounded-pill px-5 py-2">
+                <i class="fas fa-lock me-2"></i>Get Started
+            </a>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg rounded-pill px-5 py-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+            {% endif %}
+        </div>
+        <p class="text-muted small mt-4">Trusted by professionals in digital forensics, legal tech, and secure archiving.</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}{{ capsule.capsule_name or 'Capsule Details' }}{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-4 shadow-lg rounded-4 border border-light-subtle" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(16px);">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <h2 class="mb-0 text-dark">{{ capsule.capsule_name }}</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if capsule.status == 'unlocked' and capsule.is_decrypted %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-dark btn-sm rounded-pill dropdown-toggle"
+                                    type="button" id="capsuleMenu" data-bs-toggle="dropdown"
+                                    aria-expanded="false" title="More actions">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="capsuleMenu">
+                                <li>
+                                    <a class="dropdown-item text-danger"
+                                       href="{{ url_for('capsule.delete', capsule_id=capsule.id) }}">
+                                        <i class="fas fa-trash me-2"></i>Delete Capsule
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <a href="{{ url_for('capsule.view_capsules') }}"
+                           class="btn btn-outline-dark btn-sm rounded-pill" title="Back to all capsules">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Capsules
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Capsule Info Section -->
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 border border-light shadow-sm h-100" style="background: rgba(255,255,255,0.35); backdrop-filter: blur(14px);">
+                            <h5 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Capsule Info</h5>
+                            <ul class="list-unstyled fs-6 mb-0 text-dark">
+                                <li class="mb-2">
+    <i class="fas fa-hashtag me-2 text-muted"></i>
+    <strong>Capsule ID:</strong>
+    <code class="text-danger fw-semibold" style="letter-spacing: 0.5px;">{{ capsule.capsule_id }}</code>
+</li>
+
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-plus me-2 text-muted"></i>
+                                    <strong>Created:</strong>
+                                    {{ capsule.created_at.strftime('%Y-%m-%d %H:%M') if capsule.created_at else '—' }} UTC
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-unlock-alt me-2 text-muted"></i>
+                                    <strong>Unlock Time:</strong>
+                                    {{ capsule.unlock_datetime.strftime('%Y-%m-%d %H:%M') if capsule.unlock_datetime else '—' }} UTC
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-signal me-2 text-muted"></i>
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-{{ 'success' if capsule.status == 'unlocked' else 'warning' }}">
+                                        {{ capsule.status.capitalize() }}
+                                    </span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-clock me-2 text-muted"></i>
+                                    <strong>Time Left:</strong>
+                                    {% if capsule.unlock_datetime %}
+                                        <span id="countdown"
+                                              data-countdown="{{ capsule.unlock_datetime.isoformat() }}"
+                                              class="text-primary fw-bold">Calculating...</span>
+                                    {% else %}
+                                        <span class="text-danger fw-bold">Invalid unlock time</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if capsule.description %}
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 border border-light shadow-sm h-100" style="background: rgba(255,255,255,0.35); backdrop-filter: blur(14px);">
+                            <h5 class="text-primary mb-3"><i class="fas fa-align-left me-2"></i>Description</h5>
+                            <p class="text-dark mb-0">{{ capsule.description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Unlock & Download Section -->
+                <div class="text-end mt-4">
+                    {% if unlocked %}
+                        {% if preview_content and preview_path %}
+                            <div class="text-start mb-4">
+                                <h5 class="text-primary mb-3"><i class="fas fa-eye me-2"></i>Preview</h5>
+                                <div class="p-3 rounded-3 border border-light text-dark small" style="max-height: 300px; overflow-y: auto; background: rgba(255,255,255,0.25);">
+                                    <pre class="mb-0">{{ preview_content }}</pre>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info mt-4" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>No preview available for this file type.
+                            </div>
+                        {% endif %}
+
+                        <a href="{{ url_for('capsule.download', capsule_id=capsule.id) }}"
+                           class="btn btn-success btn-lg rounded-pill px-4" title="Download decrypted file">
+                            <i class="fas fa-download me-2"></i>Download File
+                        </a>
+
+                    {% elif capsule.status == 'unlocked' %}
+                        {% set danger_msgs = get_flashed_messages(category_filter=['danger']) %}
+                        {% if danger_msgs %}
+                            <div class="alert alert-danger mt-3" role="alert">
+                                {% for msg in danger_msgs %}
+                                    <i class="fas fa-times-circle me-2"></i>{{ msg }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if session.get('otp_locked_until') %}
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Too many incorrect attempts. Try again at
+                                <strong>{{ session['otp_locked_until'].strftime('%Y-%m-%d %H:%M') }} UTC</strong>.
+                            </div>
+                        {% else %}
+                            <form method="POST" class="d-inline-block">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="input-group justify-content-end">
+                                    <input type="text" name="otp"
+                                           class="form-control rounded-start-pill text-center"
+                                           placeholder="Enter OTP" required pattern="\d{6}"
+                                           maxlength="6" inputmode="numeric" style="max-width: 120px;"
+                                           aria-label="6-digit OTP">
+                                    <button type="submit" class="btn btn-primary rounded-end-pill px-4" title="Verify OTP to unlock">
+                                        <i class="fas fa-unlock me-2"></i>Unlock
+                                    </button>
+                                </div>
+                            </form>
+                        {% endif %}
+
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg rounded-pill px-4" disabled
+                                title="Capsule unlocks at {{ capsule.unlock_datetime.strftime('%Y-%m-%d %H:%M') }} UTC">
+                            <i class="fas fa-clock me-2"></i>Not Yet Unlockable
+                        </button>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const countdownElement = document.getElementById('countdown');
+    if (countdownElement && countdownElement.dataset.countdown) {
+        const endTime = new Date(countdownElement.dataset.countdown).getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = endTime - now;
+
+            if (isNaN(endTime)) {
+                countdownElement.innerText = "Invalid date";
+                countdownElement.classList.replace("text-primary", "text-danger");
+                return;
+            }
+
+            if (diff <= 0) {
+                countdownElement.innerText = "Unlocked";
+                countdownElement.classList.replace("text-warning", "text-success");
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            countdownElement.innerText = d > 0
+                ? `${d}d ${h}h ${m}m ${s}s`
+                : h > 0
+                    ? `${h}h ${m}m ${s}s`
+                    : `${m}m ${s}s`;
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+});
+</script>
+{% endblock %}

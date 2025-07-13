@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Create Capsule{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-label, .form-text, .text-black {
+        font-weight: 500;
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.2);
+        color: #000;
+        transition: all 0.3s ease-in-out;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-glass:hover {
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+    }
+
+    .btn-outline-dark:hover {
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+    }
+</style>
+
+<div class="container fade-in mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="glass-card p-4 shadow-lg rounded-4 border border-light-subtle">
+
+                <h3 class="mb-4 text-center text-black">
+                    <i class="fas fa-cube me-2"></i>Create New Time Capsule
+                </h3>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-info-circle me-1"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form id="create-form" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label for="capsule_name" class="form-label text-black">Capsule Name</label>
+                        <input type="text"
+                               class="form-control"
+                               id="capsule_name"
+                               name="capsule_name"
+                               required
+                               minlength="3"
+                               maxlength="50"
+                               placeholder="Enter a name for your capsule"
+                               autocomplete="off"
+                               autofocus>
+                        <div class="invalid-feedback">Name must be between 3 and 50 characters.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label text-black">Description (Optional)</label>
+                        <textarea class="form-control"
+                                  id="description"
+                                  name="description"
+                                  maxlength="500"
+                                  rows="3"
+                                  placeholder="Write a brief description..."></textarea>
+                        <div class="form-text text-dark">Max 500 characters.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="unlock_date" class="form-label text-black">Unlock Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="unlock_date"
+                                   name="unlock_date"
+                                   required>
+                            <div class="invalid-feedback">Please select a valid future date.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="unlock_time" class="form-label text-black">Unlock Time</label>
+                            <input type="time"
+                                   class="form-control"
+                                   id="unlock_time"
+                                   name="unlock_time"
+                                   required>
+                            <div class="invalid-feedback" id="time-feedback">Time must be at least 5 minutes from now.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="file" class="form-label text-black">File to Upload</label>
+                        <input type="file"
+                               class="form-control"
+                               id="file"
+                               name="file"
+                               required
+                               accept="*/*">
+                        <div class="invalid-feedback">Please upload a file to seal inside your capsule.</div>
+                        <div class="form-text text-dark">Files are encrypted and stored securely.</div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-glass py-2 rounded-pill">
+                            <i class="fas fa-shield-alt me-2"></i>Next: Verify OTP
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-dark rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const unlockDateInput = document.getElementById("unlock_date");
+    const unlockTimeInput = document.getElementById("unlock_time");
+    const fileInput = document.getElementById("file");
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    unlockDateInput.setAttribute("min", todayStr);
+
+    function validateUnlockTime() {
+    const selectedDateStr = unlockDateInput.value;
+    const selectedTimeStr = unlockTimeInput.value;
+    if (!selectedDateStr || !selectedTimeStr) return;
+
+    const [hour, minute] = selectedTimeStr.split(':').map(Number);
+    const selectedDateTime = new Date(selectedDateStr);
+    selectedDateTime.setHours(hour, minute, 0, 0);
+
+    const now = new Date();
+    const nowPlus2 = new Date(now.getTime() + 2 * 60000);  // 2 minutes from now
+    const isToday = selectedDateStr === todayStr;
+
+    if (isToday && selectedDateTime < nowPlus2) {
+        unlockTimeInput.setCustomValidity("Select a time at least 2 minutes from now.");
+        document.getElementById("time-feedback").innerText = "Time must be at least 2 minutes from now.";
+    } else {
+        unlockTimeInput.setCustomValidity("");
+        document.getElementById("time-feedback").innerText = "";
+    }
+}
+
+
+    unlockDateInput.addEventListener("change", validateUnlockTime);
+    unlockTimeInput.addEventListener("input", validateUnlockTime);
+    fileInput.addEventListener("paste", e => e.preventDefault());
+
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            validateUnlockTime();
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% block footer %}
+<style>
+    .glass-footer {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 1s ease-in-out;
+        padding: 1.5rem 0; /* Reduced padding for a more compact footer */
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .footer-icon {
+        text-decoration: none !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 8px; /* Reduced space between icons */
+        transition: transform 0.4s ease, opacity 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .footer-icon:hover {
+        transform: scale(1.2) translateY(-5px);
+    }
+
+    .footer-icon img {
+        width: 32px; /* Slightly smaller icons for a tighter layout */
+        height: 32px;
+        filter: brightness(90%) saturate(130%) contrast(110%);
+        transition: transform 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+        border-radius: 8px;
+    }
+
+    .footer-icon::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: transparent;
+        transition: width 0.3s ease, left 0.3s ease;
+    }
+
+    .footer-icon:hover::after {
+        width: 100%;
+        left: 0;
+    }
+
+    /* Instagram: Pink gradient glow */
+    .footer-icon.instagram:hover img {
+        box-shadow: 0 0 12px rgba(225, 29, 72, 0.9);
+    }
+    .footer-icon.instagram::after {
+        background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+    }
+
+    /* LinkedIn: Blue gradient glow */
+    .footer-icon.linkedin:hover img {
+        box-shadow: 0 0 12px rgba(0, 119, 181, 0.9);
+    }
+    .footer-icon.linkedin::after {
+        background: linear-gradient(45deg, #0077b5, #00a0dc);
+    }
+
+    /* GitHub: Purple gradient glow */
+    .footer-icon.github:hover img {
+        box-shadow: 0 0 12px rgba(88, 66, 155, 0.9);
+    }
+    .footer-icon.github::after {
+        background: linear-gradient(45deg, #5853ff, #a855f7);
+    }
+
+    /* Email: Green gradient glow */
+    .footer-icon.email:hover img {
+        box-shadow: 0 0 12px rgba(0, 128, 0, 0.9);
+    }
+    .footer-icon.email::after {
+        background: linear-gradient(45deg, #00cc00, #66ff66);
+    }
+
+    .footer-label {
+        font-size: 12px; /* Slightly smaller for compactness */
+        font-weight: 600;
+        color: #111;
+        opacity: 0;
+        margin-top: 6px; /* Reduced margin for tighter spacing */
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        text-decoration: none !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-icon:hover .footer-label {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    .footer-text {
+        font-size: 14px; /* Slightly smaller for a cleaner look */
+        color: #1a1a1a;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        margin-top: 0.5rem; /* Reduced gap between icons and copyright */
+        opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+        .footer-icon img {
+            width: 28px;
+            height: 28px;
+        }
+        .footer-icon {
+            margin: 0 6px; /* Tighter spacing for medium screens */
+        }
+        .footer-label {
+            font-size: 11px;
+        }
+        .footer-text {
+            font-size: 13px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .footer-icon img {
+            width: 24px;
+            height: 24px;
+        }
+        .footer-icon {
+            margin: 0 4px; /* Even tighter spacing for small screens */
+        }
+        .footer-label {
+            font-size: 10px;
+        }
+        .footer-text {
+            font-size: 12px;
+        }
+        .glass-footer {
+            padding: 1rem 0; /* Further reduced padding for mobile */
+        }
+    }
+</style>
+
+<footer class="glass-footer text-white py-3 mt-auto"> <!-- Reduced padding -->
+    <div class="container text-center">
+        <!-- Social Icons -->
+        <div class="mb-2 d-flex justify-content-center align-items-center flex-wrap gap-2"> <!-- Reduced gap and margin -->
+            <a href="https://instagram.com" class="footer-icon instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" />
+                <span class="footer-label">Instagram</span>
+            </a>
+            <a href="https://www.linkedin.com/in/preethi-hatui-51a80021b" class="footer-icon linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+                <span class="footer-label">LinkedIn</span>
+            </a>
+            <a href="https://github.com/Preethi-hatui" class="footer-icon github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub" class="github" />
+
+                <span class="footer-label">GitHub</span>
+            </a>
+            <a href="mailto:support@digitalcapsule.com" class="footer-icon email" aria-label="Email Support">
+                <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Email" />
+                <span class="footer-label">Email</span>
+            </a>
+        </div>
+
+        <!-- Copyright -->
+        <div>
+            <small class="footer-text">
+                © {{ now.year }} <strong>Digital Time Capsule</strong>. All rights reserved.
+            </small>
+        </div>
+    </div>
+</footer>
+{% endblock %}

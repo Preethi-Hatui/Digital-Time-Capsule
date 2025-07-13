@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5 fade-in">
+            <div class="auth-container">
+                <!-- Header -->
+                <div class="auth-header text-center mb-4">
+                    <i class="fas fa-user-plus fa-4x mb-3" style="color: var(--accent-color);"></i>
+                    <h2>Create Account</h2>
+                    <p class="text-muted">Start your Digital Time Capsule journey</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Registration Form -->
+                <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Username -->
+                    <div class="form-group mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text"
+                               id="username"
+                               name="username"
+                               class="form-control"
+                               required
+                               placeholder="Choose a username"
+                               autocomplete="username"
+                               minlength="3"
+                               maxlength="50">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control"
+                               required
+                               placeholder="Enter your email"
+                               autocomplete="email">
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group mb-3 position-relative">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   class="form-control"
+                                   required
+                                   placeholder="Create a strong password"
+                                   autocomplete="new-password"
+                                   pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
+                                   title="Password must include uppercase, lowercase, number, and special character.">
+                            <span class="input-group-text toggle-password" data-target="password" style="cursor:pointer;">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="form-text small text-muted" id="passwordHelp">
+                            At least 8 characters, with uppercase, lowercase, number & symbol.
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="form-group mb-4 position-relative">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password"
+                                   id="confirm_password"
+                                   name="confirm_password"
+                                   class="form-control"
+                                   required
+                                   placeholder="Repeat your password"
+                                   autocomplete="new-password">
+                            <span class="input-group-text toggle-password" data-target="confirm_password" style="cursor:pointer;">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- OTP Notice -->
+                    <div class="alert alert-info small text-center py-2">
+                        <i class="fas fa-envelope me-1"></i>
+                        An OTP will be sent to your email for verification.
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-glass py-3">
+                            <i class="fas fa-user-check me-2"></i> Register
+                        </button>
+                    </div>
+
+                    <!-- Login Switch -->
+                    <div class="auth-footer text-center small">
+                        Already have an account?
+                        <a href="{{ url_for('auth.login') }}" class="auth-switch-link">Log in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Toggle Script -->
+<script>
+    document.querySelectorAll('.toggle-password').forEach(icon => {
+        icon.addEventListener('click', function () {
+            const input = document.getElementById(this.dataset.target);
+            const iconEl = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconEl.classList.remove('fa-eye');
+                iconEl.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                iconEl.classList.remove('fa-eye-slash');
+                iconEl.classList.add('fa-eye');
+            }
+        });
+    });
+</script>
+{% endblock %}

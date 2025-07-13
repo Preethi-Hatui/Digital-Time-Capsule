@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP to Create Capsule{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="glass-card p-4 shadow-lg rounded-4 border border-light-subtle text-center">
+
+                <!-- Header -->
+                <h3 class="mb-3 text-black">
+                    <i class="fas fa-shield-alt me-2"></i>Verify OTP to Create Capsule
+                </h3>
+                <p class="mb-4" style="color:#000;">
+                    Scan this QR code using <strong>Google Authenticator</strong> or any TOTP-compatible app,
+                    then enter the 6-digit code shown.
+                </p>
+
+                <!-- QR Code -->
+                {% if qr_code %}
+                <div class="mb-4">
+                    <img src="data:image/png;base64,{{ qr_code }}"
+                         alt="Time-based One-Time Password QR Code"
+                         class="img-fluid rounded-3 border border-white shadow-sm"
+                         style="max-width: 260px;">
+                </div>
+                {% else %}
+                <div class="alert alert-danger">
+                    QR code could not be generated. Please try again or contact support.
+                </div>
+                {% endif %}
+
+                <!-- Unlock Time Info -->
+                {% if unlock_datetime_str %}
+                <p class="small mb-4" style="color:#000;">
+                    <i class="fas fa-clock me-2 text-warning"></i>
+                    Capsule will unlock at: <strong>{{ unlock_datetime_str }} UTC</strong>
+                </p>
+                {% endif %}
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- OTP Form -->
+                <form method="POST"
+                      action="{{ url_for('capsule.confirm') }}"
+                      class="needs-validation mt-3"
+                      novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label for="otp" class="form-label" style="color:#000;">Enter 6-digit OTP</label>
+                        <input type="text"
+                               class="form-control text-center stylish-input"
+                               id="otp"
+                               name="otp"
+                               placeholder="123456"
+                               required
+                               pattern="[0-9]{6}"
+                               maxlength="6"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               autofocus>
+                        <div class="invalid-feedback">Please enter a valid 6-digit OTP.</div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-glass rounded-pill py-2">
+                            <i class="fas fa-lock-open me-2"></i> Create Capsule
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Back Button -->
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('capsule.create') }}" class="btn btn-outline-dark rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Create
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    'use strict';
+
+    const forms = document.querySelectorAll('.needs-validation');
+    forms.forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+
+    const otpInput = document.getElementById("otp");
+    if (otpInput) {
+        otpInput.focus();
+        otpInput.addEventListener("paste", e => e.preventDefault());
+
+        otpInput.addEventListener("input", function () {
+            const value = this.value;
+            if (!/^\d{0,6}$/.test(value)) {
+                this.value = value.replace(/\D/g, '').slice(0, 6);
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}

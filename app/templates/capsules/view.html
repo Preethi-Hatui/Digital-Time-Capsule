@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}{{ capsule.capsule_name or 'Capsule Details' }}{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-4 shadow-lg rounded-4 border-0 overflow-hidden position-relative">
+                <!-- Glow effect background -->
+                <div class="position-absolute top-0 end-0 start-0 bottom-0" style="
+                    background: radial-gradient(circle at 70% 30%, rgba(10, 40, 100, 0.15) 0%, transparent 70%);
+                    z-index: -1;"></div>
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light border-opacity-10">
+                    <h2 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-capsule me-2 text-primary"></i>{{ capsule.capsule_name }}
+                    </h2>
+                    <a href="{{ url_for('capsule.view_capsules') }}"
+                       class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 hover-scale" 
+                       title="Back to all capsules">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Collection
+                    </a>
+                </div>
+
+                <!-- Capsule Info -->
+                <div class="row g-4">
+                    <!-- Left: Capsule Metadata -->
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 h-100 position-relative overflow-hidden" 
+                             style="background: linear-gradient(135deg, rgba(10, 25, 60, 0.8) 0%, rgba(5, 15, 40, 0.9) 100%);
+                                    backdrop-filter: blur(8px);
+                                    border: 1px solid rgba(65, 105, 225, 0.2);">
+                            <div class="position-absolute top-0 end-0 start-0 bottom-0" style="
+                                background: radial-gradient(circle at 80% 20%, rgba(25, 100, 200, 0.1) 0%, transparent 70%);
+                                z-index: 0;"></div>
+                            <div class="position-relative z-index-1">
+                                <h5 class="text-info mb-3 d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>Capsule Information
+                                </h5>
+                                <ul class="list-unstyled fs-6 mb-0 text-white-50">
+                                    <li class="mb-3 d-flex align-items-start">
+                                        <i class="fas fa-calendar-plus mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">Created</strong>
+                                            {{ capsule.created_at.strftime('%Y-%m-%d %H:%M') if capsule.created_at else '—' }}
+                                            <small class="text-muted">UTC</small>
+                                        </div>
+                                    </li>
+                                    <li class="mb-3 d-flex align-items-start">
+                                        <i class="fas fa-unlock-alt mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">Unlock Time</strong>
+                                            {{ capsule.unlock_datetime.strftime('%Y-%m-%d %H:%M') if capsule.unlock_datetime else '—' }}
+                                            <small class="text-muted">UTC</small>
+                                        </div>
+                                    </li>
+                                    <li class="mb-3 d-flex align-items-start">
+                                        <i class="fas fa-lock mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">Status</strong>
+                                            <span class="badge bg-{{ 'success' if capsule.status == 'unlocked' else 'warning' }} text-uppercase fs-6 py-1 px-2">
+                                                {{ capsule.status }}
+                                            </span>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex align-items-start">
+                                        <i class="fas fa-clock mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">Time Remaining</strong>
+                                            {% if capsule.unlock_datetime %}
+                                                <span id="countdown"
+                                                      data-countdown="{{ capsule.unlock_datetime.isoformat() }}"
+                                                      class="text-warning fw-bold fs-5">Calculating...</span>
+                                            {% else %}
+                                                <span class="text-danger fw-bold">No unlock time set</span>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Description or File Info -->
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 h-100 position-relative overflow-hidden" 
+                             style="background: linear-gradient(135deg, rgba(20, 30, 60, 0.8) 0%, rgba(10, 20, 50, 0.9) 100%);
+                                    backdrop-filter: blur(8px);
+                                    border: 1px solid rgba(65, 105, 225, 0.2);">
+                            <div class="position-relative z-index-1">
+                                {% if capsule.description %}
+                                    <h5 class="text-info mb-3 d-flex align-items-center">
+                                        <i class="fas fa-align-left me-2"></i>Description
+                                    </h5>
+                                    <div class="bg-dark bg-opacity-25 p-3 rounded-3 mb-3">
+                                        <p class="text-white-75 mb-0">{{ capsule.description }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                <h5 class="text-info mb-3 d-flex align-items-center">
+                                    <i class="fas fa-file-alt me-2"></i>File Details
+                                </h5>
+                                <ul class="list-unstyled text-white-50 mb-0">
+                                    <li class="mb-3 d-flex align-items-start">
+                                        <i class="fas fa-file mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">File Name</strong>
+                                            {{ capsule.original_filename or '—' }}
+                                        </div>
+                                    </li>
+                                    <li class="mb-3 d-flex align-items-start">
+                                        <i class="fas fa-file-code mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">File Type</strong>
+                                            {{ capsule.original_filename.rsplit('.', 1)[1]|upper if '.' in capsule.original_filename else 'Unknown' }}
+                                        </div>
+                                    </li>
+                                    {% if capsule.file_size %}
+                                    <li class="d-flex align-items-start">
+                                        <i class="fas fa-database mt-1 me-3 text-primary opacity-75"></i>
+                                        <div>
+                                            <strong class="d-block text-white-75">File Size</strong>
+                                            {{ (capsule.file_size / 1024)|round(2) }} KB
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capsule Actions -->
+                <div class="text-center mt-5 pt-3">
+                    {% if capsule.status == 'unlocked' %}
+                        <a href="{{ url_for('capsule.download_capsule', capsule_id=capsule.id) }}"
+                           class="btn btn-success btn-glass-hover btn-lg rounded-pill px-4 py-3 hover-glow" 
+                           title="Download the decrypted file"
+                           style="min-width: 220px;">
+                            <i class="fas fa-download me-2"></i>Download Now
+                        </a>
+                    {% elif capsule.unlock_datetime and current_time and capsule.unlock_datetime <= current_time %}
+                        <a href="{{ url_for('capsule.unlock', capsule_id=capsule.id) }}"
+                           class="btn btn-primary btn-glass-hover btn-lg rounded-pill px-4 py-3 hover-glow" 
+                           title="Unlock this capsule now"
+                           style="min-width: 220px;">
+                            <i class="fas fa-unlock me-2"></i>Unlock Capsule
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg rounded-pill px-4 py-3" disabled
+                                title="Available after {{ capsule.unlock_datetime.strftime('%Y-%m-%d %H:%M') }} UTC"
+                                style="min-width: 220px;">
+                            <i class="fas fa-clock me-2"></i>Locked
+                        </button>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const countdownElement = document.getElementById('countdown');
+    if (countdownElement && countdownElement.dataset.countdown) {
+        const endTime = new Date(countdownElement.dataset.countdown).getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = endTime - now;
+
+            if (isNaN(endTime)) {
+                countdownElement.textContent = "Invalid date";
+                countdownElement.classList.replace("text-warning", "text-danger");
+                return;
+            }
+
+            if (diff <= 0) {
+                countdownElement.textContent = "Ready to unlock!";
+                countdownElement.classList.replace("text-warning", "text-success");
+                // Reload the page to show the unlock button
+                setTimeout(() => location.reload(), 1000);
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            // Format with leading zeros and conditional display
+            const formattedHours = hours.toString().padStart(2, '0');
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            const formattedSeconds = seconds.toString().padStart(2, '0');
+
+            if (days > 0) {
+                countdownElement.innerHTML = `
+                    <span class="countdown-part">${days}<small>d</small></span>
+                    <span class="countdown-part">${formattedHours}<small>h</small></span>
+                    <span class="countdown-part">${formattedMinutes}<small>m</small></span>
+                `;
+            } else {
+                countdownElement.innerHTML = `
+                    <span class="countdown-part">${formattedHours}<small>h</small></span>
+                    <span class="countdown-part">${formattedMinutes}<small>m</small></span>
+                    <span class="countdown-part">${formattedSeconds}<small>s</small></span>
+                `;
+            }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+});
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(15, 25, 50, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .btn-glass-hover {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-glass-hover:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .hover-glow:hover {
+        box-shadow: 0 0 15px rgba(65, 105, 225, 0.6);
+    }
+    
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+    
+    .hover-scale:hover {
+        transform: scale(1.05);
+    }
+    
+    .countdown-part {
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
+        margin: 0 2px;
+    }
+    
+    .countdown-part small {
+        display: block;
+        font-size: 0.6em;
+        opacity: 0.7;
+    }
+    
+    .z-index-1 {
+        z-index: 1;
+    }
+    
+    .border-light {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+</style>
+{% endblock %}

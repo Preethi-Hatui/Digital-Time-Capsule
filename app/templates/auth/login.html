@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container fade-in mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="auth-container p-4 p-md-5 rounded-4 shadow-lg glass-effect">
+
+                <!-- Header -->
+                <div class="auth-header text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Digital Time Capsule Logo" class="auth-logo mb-3">
+                    <h2 class="fw-bold">Login</h2>
+                    <p class="text-muted">Access your digital capsules securely</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Login Form -->
+                <form method="POST" action="{{ url_for('auth.login') }}" class="needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Email -->
+                    <div class="form-group mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control"
+                               required
+                               placeholder="Enter your email"
+                               autocomplete="email">
+                        <div class="invalid-feedback">
+                            Please enter a valid email address.
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group mb-4 position-relative">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   class="form-control"
+                                   required
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password">
+                            <span class="input-group-text toggle-password" data-target="password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter your password.
+                        </div>
+                    </div>
+
+                    <!-- OTP Notice -->
+                    <div class="alert alert-info text-center small py-2 mb-4">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        After login, you'll be asked to verify your identity with a 6-digit OTP (valid for 5 minutes).<br>
+                        <i class="fas fa-lock me-1 mt-1"></i> 3 failed OTP attempts will lock your account for 1 hour.
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-dark btn-lg rounded-3 shadow-sm">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                        </button>
+                    </div>
+
+                    <!-- Register Link -->
+                    <div class="text-center small mt-2">
+                        Don’t have an account?
+                        <a href="{{ url_for('auth.register') }}" class="auth-switch-link text-decoration-none fw-semibold">Register</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(icon => {
+        icon.addEventListener('click', function () {
+            const input = document.getElementById(this.dataset.target);
+            const iconEl = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconEl.classList.remove('fa-eye');
+                iconEl.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                iconEl.classList.remove('fa-eye-slash');
+                iconEl.classList.add('fa-eye');
+            }
+        });
+    });
+
+    // Bootstrap form validation
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+});
+</script>
+{% endblock %}

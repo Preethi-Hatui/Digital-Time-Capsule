@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Capsules{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-center text-black">
+    <i class="fas fa-box-archive me-2"></i>Your Time Capsules<i class="fas fa-box-archive ms-2"></i>
+  </h2>
+
+  {% if capsules %}
+    <div class="capsule-table-container">
+      <table class="capsule-table">
+        <thead>
+          <tr>
+            <th>Capsule Name</th>
+            <th>Capsule ID</th>
+            <th>Original File</th>
+            <th>Status</th>
+            <th>Unlock Time (UTC)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for capsule in capsules %}
+            <tr>
+              <td>
+                <i class="fas fa-file-alt me-2"></i>
+                <strong>{{ capsule.capsule_name }}</strong>
+              </td>
+              <td><code>{{ capsule.capsule_id or "—" }}</code></td>
+              <td>
+                {% if capsule.original_filename %}
+                  <i class="fas fa-paperclip me-1"></i>{{ capsule.original_filename }}
+                {% else %}
+                  <span class="text-muted">Unknown</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if capsule.status == 'unlocked' %}
+                  <span class="capsule-status unlocked">
+                    <i class="fas fa-unlock me-1"></i> Unlocked
+                  </span>
+                {% else %}
+                  <span class="capsule-status locked">
+                    <i class="fas fa-lock me-1"></i>Locked
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if capsule.unlock_datetime %}
+                  <div class="unlock-time">
+                    <i class="fas fa-clock me-1"></i>
+                    {{ capsule.unlock_datetime.strftime('%Y-%m-%d %H:%M') }}<small class="text-muted ms-1">UTC</small>
+                  </div>
+                {% else %}
+                  <div class="text-danger">Invalid UTC</div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="action-buttons">
+                  {% if capsule.status == 'unlocked' %}
+                    <div class="primary-actions">
+                      <a href="{{ url_for('capsule.view_capsule', capsule_id=capsule.id) }}"
+                        class="btn btn-view">
+                        <i class="fas fa-eye me-1"></i> View
+                      </a>
+                      {% if capsule.is_decrypted %}
+                        <a href="{{ url_for('capsule.download', capsule_id=capsule.id) }}"
+                          class="btn btn-download">
+                          <i class="fas fa-download me-1"></i> Download
+                        </a>
+                      {% endif %}
+                    </div>
+                    {% if capsule.is_decrypted %}
+                      <div class="secondary-actions">
+                        <a href="{{ url_for('capsule.delete', capsule_id=capsule.id) }}"
+                          class="btn btn-delete">
+                          <i class="fas fa-trash-alt me-1"></i> Delete
+                        </a>
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    {% if capsule.unlock_datetime %}
+                      <div class="countdown-container">
+                        <span class="countdown-timer"
+                              data-countdown="{{ capsule.unlock_datetime.isoformat() }}"
+                              data-capsule-id="{{ capsule.id }}">
+                          <i class="fas fa-hourglass-start me-1"></i>
+                          <span class="countdown">Calculating...</span>
+                        </span>
+                      </div>
+                    {% else %}
+                      <span class="invalid-time">Invalid unlock time</span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state-container">
+      <div class="empty-state-card">
+        <div class="empty-state-icon">
+          <div class="sandglass-animation">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+        </div>
+        <h3 class="empty-state-title">NO TIME CAPSULES YET</h3>
+        <p class="empty-state-text">
+          You haven't created any digital time capsules yet. Preserve your special memories, notes, or files by starting your first capsule today.
+        </p>
+        <div class="empty-state-actions">
+          <a href="{{ url_for('capsule.create') }}" class="btn btn-create">
+            <i class="fas fa-plus-circle me-2"></i> Create Your First Capsule
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+:root {
+  --primary-color: #000000;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #f1c40f;
+  --info-color: #007bff;
+  --light-color: #f8f9fa;
+  --dark-color: #2c3e50;
+  --border-color: #e9ecef;
+  --text-color: #000000;
+  --text-muted: #7f8c8d;
+  --button-text: #ffffff;
+  --bg-color: #ecf0f1;
+  --card-bg: #ffffff;
+  --table-bg: linear-gradient(135deg, rgba(255, 182, 193, 0.03), rgba(74, 107, 255, 0.03));
+  --table-header-bg: linear-gradient(135deg, rgba(255, 182, 193, 0.08), rgba(74, 107, 255, 0.08));
+  --table-row-hover: linear-gradient(135deg, rgba(255, 182, 193, 0.08), rgba(74, 107, 255, 0.08));
+  --locked-color: #d1c4e9;
+  --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(12px);
+  --create-btn-gradient: linear-gradient(135deg, #ff8fa3, #3b5bdb);
+  --create-btn-hover: linear-gradient(135deg, #ff6f91, #2a4db8);
+  --scrollbar-color: #d1c4e9;
+  --scrollbar-bg: rgba(255, 182, 193, 0.08);
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-weight: 800;
+  color: var(--text-color);
+  letter-spacing: -0.8px;
+  font-size: 2.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+}
+
+/* Empty state styling */
+.empty-state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 65vh;
+  padding: 2rem 0;
+}
+
+.empty-state-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 20px;
+  box-shadow: var(--box-shadow);
+  padding: 3rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.empty-state-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.empty-state-icon {
+  margin-bottom: 2rem;
+}
+
+.sandglass-animation {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--create-btn-gradient);
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.sandglass-animation:hover {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.sandglass-animation i {
+  font-size: 3rem;
+  color: var(--text-color);
+  animation: flip 3s infinite ease-in-out;
+}
+
+@keyframes flip {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+}
+
+.empty-state-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1.2rem;
+  color: var(--text-color);
+  text-transform: uppercase;
+}
+
+.empty-state-text {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.empty-state-actions {
+  margin-top: 2rem;
+}
+
+.btn-create {
+  background: var(--create-btn-gradient);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 12px;
+  color: var(--text-color);
+  font-weight: 700;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-create:hover {
+  background: var(--create-btn-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+/* Table styling - Clean and simple */
+.capsule-table-container {
+  background: var(--table-bg);
+  border-radius: 20px;
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.capsule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  background: transparent;
+}
+
+.capsule-table thead th {
+  background: var(--table-header-bg);
+  padding: 1.5rem 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: left;
+  border: none;
+}
+
+.capsule-table thead th:first-child {
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+}
+
+.capsule-table thead th:last-child {
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.capsule-table tbody tr {
+  background: transparent;
+  transition: var(--transition);
+}
+
+.capsule-table tbody tr:hover {
+  background: var(--table-row-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.capsule-table td {
+  padding: 1.5rem 1rem;
+  vertical-align: middle;
+  word-break: break-word;
+  color: var(--text-color);
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.capsule-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status badges */
+.capsule-status {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.capsule-status.locked {
+  background: var(--locked-color);
+}
+
+.capsule-status.unlocked {
+  background: var(--success-color);
+  color: var(--button-text);
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.primary-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.secondary-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.3rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--button-text);
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.btn-view {
+  background: var(--info-color);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-view:hover {
+  background: #0056b3;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  color: var(--button-text);
+}
+
+.btn-download {
+  background: var(--success-color);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-download:hover {
+  background: #218838;
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  color: var(--button-text);
+}
+
+.btn-delete {
+  background: var(--danger-color);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-delete:hover {
+  background: #c82333;
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  color: var(--button-text);
+}
+
+/* Countdown timer */
+.countdown-container {
+  display: flex;
+  justify-content: center;
+}
+
+.countdown-timer {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-color);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.countdown {
+  font-weight: 800;
+  color: var(--text-color);
+}
+
+.invalid-time {
+  color: var(--danger-color);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.unlock-time {
+  display: flex;
+  align-items: center;
+}
+
+/* Remove all unwanted effects */
+* {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Prevent text selection on interactive elements */
+.countdown-timer,
+.capsule-status,
+.btn {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .capsule-table-container {
+    overflow-x: auto;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .capsule-table-container {
+    padding: 1rem;
+  }
+  
+  .action-buttons {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 12px;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    padding: 0.8rem;
+  }
+  
+  .empty-state-card {
+    padding: 2rem;
+    max-width: 500px;
+  }
+  
+  .empty-state-title {
+    font-size: 1.8rem;
+  }
+  
+  .empty-state-text {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .btn-create {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .capsule-table td, 
+  .capsule-table th {
+    padding: 1rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .primary-actions {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .action-buttons {
+    gap: 0.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  h2 {
+    font-size: 1.6rem;
+  }
+  
+  .empty-state-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+    max-width: 400px;
+  }
+  
+  .sandglass-animation {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .sandglass-animation i {
+    font-size: 2.5rem;
+  }
+  
+  .empty-state-title {
+    font-size: 1.4rem;
+  }
+  
+  .empty-state-text {
+    font-size: 0.95rem;
+  }
+  
+  .capsule-table td, 
+  .capsule-table th {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .capsule-status,
+  .countdown-timer,
+  .invalid-time {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .action-buttons {
+    min-width: 160px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function updateAllCountdowns() {
+    const elements = document.querySelectorAll('[data-countdown]');
+    
+    elements.forEach(el => {
+      const isoTime = el.getAttribute('data-countdown');
+      const countdownSpan = el.querySelector('.countdown');
+      
+      if (!countdownSpan || !isoTime) return;
+
+      const now = new Date().getTime();
+      const unlockTime = new Date(isoTime).getTime();
+      const diff = unlockTime - now;
+
+      if (isNaN(unlockTime)) {
+        countdownSpan.textContent = "Invalid date";
+        return;
+      }
+
+      if (diff <= 0) {
+        countdownSpan.innerHTML = '<i class="fas fa-check-circle me-1"></i>Available now';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const newText = 
+        days > 0 ? `${days}d ${hours}h ${minutes}m` :
+        hours > 0 ? `${hours}h ${minutes}m ${seconds}s` :
+        `${minutes}m ${seconds}s`;
+
+      if (countdownSpan.textContent !== newText) {
+        countdownSpan.textContent = newText;
+      }
+    });
+  }
+
+  updateAllCountdowns();
+  setInterval(updateAllCountdowns, 1000);
+});
+</script>
+{% endblock %}
