@@ -1,0 +1,35 @@
+venv/
+.env
+*.pyc
+__pycache__/
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite
+temp_uploads/
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+
+# Uploads & temp folders
+app/static/uploads/
+app/temp/
+
+# Media files
+*.mp4
+*.mkv
+*.mov
+
+# Secrets & credentials
+.env
+*.pem
+
+# DB / output / logs
+*.sqlite3
+*.log
